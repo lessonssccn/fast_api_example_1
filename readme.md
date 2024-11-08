@@ -11,6 +11,7 @@
 * Использовния разных бд для запуска и тестирования
 
 ### Подготовка окружения
+Все команды для командной linux
 ```
 git clone https://github.com/lessonssccn/fast_api_example_1.git
 ```
@@ -25,6 +26,10 @@ source env/bin/activate
 ```
 ```
 pip install -r requirements.txt
+```
+### Запуск виртуального окружения
+```
+source env/bin/activate
 ```
 
 ### Запуск
