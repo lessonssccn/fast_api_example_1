@@ -21,7 +21,7 @@ cd fast_api_example_1
 python3 -m venv env
 ```
 ```
-source env/bin/activete
+source env/bin/activate
 ```
 ```
 pip install -r requirements.txt
