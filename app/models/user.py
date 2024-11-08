@@ -1,25 +1,39 @@
-from pydantic import BaseModel
-from datetime import datetime
-from app.models.base import BaseResponse
+#Здесь описанны моедли необходимые для работы с users
+from pydantic import BaseModel #импорт базового класса моделей
+from datetime import datetime #импорт типа для описания дата времени
+from app.models.base import BaseResponse #импорт класса базового ответа сервера
 
-
+#класс для описания структыры тела запроса на добавления прользоватлея
+#обязатльны к заполения поля, но по факту нет провекрок на то чтобы они были не пустыми строками
+#зато сам fastapi и pydantic сгенерируют ответ если какое-то из полей будет отсутствоать или иметь не тот тип данных
 class AddUser(BaseModel):
-    name: str
-    password: str
+    name: str # имя пользователя строка, допустима строка из нуля символов
+    password: str # пароль пользователя строка, допустима строка из нуля симолов 
 
+#для обновлени имени или пароля пользовтаеля 
 class UpdateUser(BaseModel):
-    name: str|None = None
-    password: str|None = None
+    name: str|None = None # заданно дефолтное занчение None чтобы допустиь запросы без этого поля 
+    password: str|None = None #аналогично
+    #запрос без обоих полей будет обработан в обработчике в файле app.routers.user
 
-class User(BaseModel):
+# моедель содержащая информацию о пользовтеле его id имя и дату добавления пароль не передаем т.к. это старнный функционал, 
+# но судя по хранения пароля в бд мы здесь не за безопасность и можем себе позволить его возврат
+class User(BaseModel): 
     id: int
     name: str
     createdAt: datetime
 
+#ответ содержащий информацию о полтзовтеле состоит из 2 полей 
+#success из базового класса BaseResponse
+#data содержащего информацию о пользовтеле в виде модели User
 class UserResponse(BaseResponse):
     data: User
 
+#Ответ Содержит список пользователей а таак же информацию 
+#о том скаим смещеним и количеством они были запрошены из бд и поле success от базового класса 
 class ListUserResponse(BaseResponse):
     items: list[User]
     offset: int
     limit: int
+
+#поле success в обоих ответах содержат True по умолчанию

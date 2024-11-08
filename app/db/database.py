@@ -1,23 +1,26 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-import os
+#предпологается что в пакете app.db будет содержаться файлы необходимые для коретной настройки работы с бд
+#сущности при текущей структуре проекта следует описывать в отдельном пакете db.entities
+from sqlalchemy import create_engine #импоркт функции создания engine ключивой сущности для установления соединения с бд
+from sqlalchemy.ext.declarative import declarative_base # функция получения базового класса для созднания обекто реляционного маппинга декларативнго типа, учтаревшая функция оставленна для демострации реакции pytest
+from sqlalchemy.orm import sessionmaker #импорт класса обект которого будет открывать сессию для работы с бд
+import os #пакет для работы с переменными окрыжения и не только, но здесь толко для этого
 
-SQLITE_DATABASE_URL_DEFAULT = "sqlite:///./demo.db"
-sql_connection_string = SQLITE_DATABASE_URL_DEFAULT
-if os.environ.get('TESTING', None) == 'True':
-    sql_connection_string = os.environ['SQLITE_TEST']
+SQLITE_DATABASE_URL_DEFAULT = "sqlite:///demo.db" #дефолтная строка подключения часть sqlite - указания что хотим рабоать с sqlite :/// - обязательные разделители demo.db - имя файла для хранения бд
+# sqlite хранит одну базу в одном файл
+sql_connection_string = SQLITE_DATABASE_URL_DEFAULT #sql_connection_string переменная для определения к каой бд подцепиться рабочей или тестовой
+if os.environ.get('TESTING', None): #если переменная окружения TESTING задана значит предпологаем что идет тестировние приложения инадо исполтзовать другую бд
+    sql_connection_string = os.environ['SQLITE_TEST'] #ожидаем что при запуске тестов в переменной окружения SQLITE_TEST будет задана строка подключения к нужной бд
 
-engine = create_engine(sql_connection_string, echo=True)
+engine = create_engine(sql_connection_string, echo=True) #создаем engine с определенной строкой подключения, echo=True - в консоль будут писаться выполняемые sql запросы
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine) #создаем обект который будем использовать для инициализации сессии работы с бд
 
-Base = declarative_base()
+Base = declarative_base() #получаем класс от которого будет насследоваться все классы для ORM
 
 
-def get_db():
-    db = SessionLocal()
+def get_db(): # функция для облегчения работы с бд будет использоваться для внедеения зависимостей в обработчиках
+    db = SessionLocal() #создаем сессию для работы с бд
     try:
-        yield db
+        yield db #возвращаем сессию как резултат работы фнкции, но сама функция не прекращает работу
     finally:
-        db.close()
+        db.close() #закрываем сессию после того как поработали с бд

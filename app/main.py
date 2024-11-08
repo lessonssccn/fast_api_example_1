@@ -1,16 +1,30 @@
-from fastapi import FastAPI
-from app.models.user import *
-from app.db.database import engine, Base
-import app.routers.user as user_routers
-import os
+#осоновной файл придожения
+#здесь происходит инициализация бд при нормальном запуске
+#создается объект FastAPI - основа всего приложения
+#подключение роутов из других пакетов
+#и добавление обработчика для запроса к корню приложения, используется для демонстрации работы приложения и не нисет смысловой накгрузки
+from fastapi import FastAPI #импорт основного класса
+from app.db.database import engine, Base  #импорт оъектов и классов необходимых для инициализации бд
+import app.routers.user as user_routers # имрорт роутов вынесенных в другой пакет, разбиение на паекты сделанна для структурирования кода программы
+import os #импорт пакета необходимого для черения переменых окружения понадобиться для разделения запусков на тестовые и обычные
+# проверяем переменную окружения с именем TESTING если установленно значение отличное от пустой строки 
+# считаем что это запус для тестирования иначе обычный
+#влияет на то как мы инициализируем бд если тестирование инициализация происходит в тестах
+if not os.environ.get('TESTING', None):
+    Base.metadata.create_all(bind=engine) #создаем таблицы на основе классов унаследованных от Base
+    #Base создается в app.db.database
 
-if os.environ.get('TESTING', None) != 'True':
-    Base.metadata.create_all(bind=engine)
+app = FastAPI() #создем объект клсса FastAPI который станет базой всего приложения
 
-app = FastAPI()
+app.include_router(user_routers.router, tags=["Users"], prefix="/api/users") # подклюючаем к приложению роуты из другого пакета app.routers.user
+#user_routers.router - указываем переменную которая информацию о других обработчика
+#tags=["Users"] - задаем тег для документации
+#prefix="/api/users" - задем префикс ко все роутам указаным в user_routers.router
+#чтобы отправить кним запрос надо будет укзать адресс/api/users/остальной путь
+#пример запроса для получения user по id 
 
-app.include_router(user_routers.router, tags=["Users"], prefix="/api/users")
-
-@app.get("/")
-def root():
-    return {"message": "ok"}
+#example.com - пример запроса к корню
+#example.com/test - пример запроса по пути /test
+@app.get("/") #доболвяем дикоратор, который превращает функцию root в обработчик GET запросов к корню приложения когда указан только адресс без других частей пути
+def root(): #создаем функцию без параметров тк ничего не ожидаем от пользоватяел при выполении запроса
+    return {"message": "ok"} #Возвращаем ответ fastapi самостоятельно преобразует словарь в json строку и поместит ответ в тело ответа
